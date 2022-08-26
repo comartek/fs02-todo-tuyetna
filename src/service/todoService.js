@@ -1,6 +1,6 @@
 import todo from "../constant/http-common"
-const getAll = () => {
 
+const getAll = () => {
     return todo.get("/task");
 };
 const create = data => {

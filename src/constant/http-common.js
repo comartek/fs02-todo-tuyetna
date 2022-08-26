@@ -1,5 +1,5 @@
 import axios from "axios";
-import { token } from './author'
+const token = localStorage.getItem('token')
 export default axios.create({
 
     baseURL: "https://api-nodejs-todolist.herokuapp.com",

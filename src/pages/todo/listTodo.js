@@ -2,23 +2,23 @@ import { useEffect, useState } from "react";
 import './listTodo.css'
 import AddTodo from "../../components/addTodo";
 import axios from "axios";
+
 import Items from "../../components/item";
 import Pagination from "../../components/Pagination";
 import { useNavigate, Link } from 'react-router-dom';
 import todoService from "../../service/todoService";
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import LogoutIcon from '@mui/icons-material/Logout';
-
+import SpinLoading from "../../components/spinner/Spinner";
+import userService from "../../service/userService";
 
 const ListTodo = (props) => {
-
 
     let { openNotificationWithIcon } = props
     let navigate = useNavigate()
 
     const [isShow, setIsShow] = useState(false)
     const handleOnShow = () => setIsShow(true)
-    const token = localStorage.getItem('token')
     const [todoList, setTodoList] = useState([])
     const [newContent, setNewContent] = useState()
 
@@ -30,24 +30,25 @@ const ListTodo = (props) => {
     const currentItems = todoList.slice(indexOfFistPost, indexOfLastPost)
 
     const showData = () => {
+        console.log(localStorage.getItem("token"))
+        setLoading(true);
         todoService.getAll().then(res => {
             setTodoList(res.data.data)
-
-        }).catch(error => console.log(error));
-
+            setLoading(false)
+        })
+            .catch(error => console.log(error));
     }
 
 
     useEffect(() => {
-        setLoading(true)
         showData()
-        setLoading(false)
+
     }, [])
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
     const handleOnclick = () => {
-
+        setLoading(true);
         let data = {
             "description": newContent
         }
@@ -56,6 +57,7 @@ const ListTodo = (props) => {
             then(res => {
                 setTodoList((pre) => [res.data.data, ...pre])
                 openNotificationWithIcon('success', 'add todo', "Add todolist successfully")
+                setLoading(false);
             }).catch(error => console.log(error));
 
         setIsShow(false)
@@ -70,18 +72,20 @@ const ListTodo = (props) => {
 
     const handleDelete = (todo) => {
 
-
+        setLoading(true);
         todoService.remove(todo._id)
             .then(res => {
                 const newTodoList = todoList.filter(item => item._id !== todo._id)
                 setTodoList(newTodoList)
                 openNotificationWithIcon('success', 'delete todo', "Delete todolist successfully")
+                setLoading(false);
             })
             .catch(error => console.log(error));
     }
     const keyDownHandler = (event, todo) => {
 
         if (event.key === 'Enter') {
+            setLoading(true);
             let data = {
                 "description": event.target.value
             }
@@ -89,11 +93,13 @@ const ListTodo = (props) => {
                 .then(res => {
                     setTodoList(todoList.map(item => item._id === todo._id ? { ...res.data.data, description: event.target.value } : item))
                     openNotificationWithIcon('success', 'edit', "Change todolist successfully")
+                    setLoading(false);
                 }).catch(error => console.log(error));
         }
     }
 
     const DataSave = (event, todo) => {
+        setLoading(true);
         let data = {
             "description": event.target.value
         }
@@ -101,6 +107,7 @@ const ListTodo = (props) => {
             .then(res => {
                 setTodoList(todoList.map(item => item._id === todo._id ? { ...res.data.data, description: event.target.value } : item))
                 openNotificationWithIcon('success', 'edit todo', "Change todolist successfully")
+                setLoading(false);
             }).catch(error => console.log(error));
     }
 
@@ -116,6 +123,7 @@ const ListTodo = (props) => {
     }
 
     const DoneTodo = (todo) => {
+        setLoading(true);
         let data = {
             "completed": true
         }
@@ -123,14 +131,23 @@ const ListTodo = (props) => {
             .then(res => {
                 setTodoList(todoList.map(item => item._id === todo._id ? { ...res.data.data, completed: true } : item))
                 openNotificationWithIcon('success', 'check todo', "Todo completed")
+                setLoading(false);
             }).catch(error => console.log(error));
 
     }
 
     const logOutUser = () => {
+        setLoading(true)
+        userService.logout()
+            .then(res => {
+                navigate('/', { replace: true })
+                openNotificationWithIcon('success', "logout done", "Logout successfully")
+                setLoading(false);
 
-        localStorage.setItem('token', null)
-        navigate('/login', { replace: true })
+            })
+            .catch(error => openNotificationWithIcon('error', "logout fail", ""));
+        // localStorage.removeItem('token')
+        // navigate('/login', { replace: true })
     }
 
 
@@ -141,6 +158,7 @@ const ListTodo = (props) => {
 
     return (
         <div className="mainList">
+            {loading ? (<SpinLoading />) : ""}
             <div className="header">
                 <div className="logOut">
                     <button onClick={() => logOutUser()}><LogoutIcon /></button>
@@ -178,6 +196,8 @@ const ListTodo = (props) => {
 
 
         </div >
+
+
     )
 
 }

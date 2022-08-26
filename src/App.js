@@ -82,7 +82,7 @@ function App() {
 
 
             <Route path="/user"
-              element={<User token={token}
+              element={<User
                 openNotificationWithIcon={openNotificationWithIcon}
               />}>
               <Route path=":id" element={<User />} />

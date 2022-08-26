@@ -6,8 +6,8 @@ const get = () => {
 const update = (data) => {
     return user.put(`/me`, data);
 };
-const logout = id => {
-    return user.delete(`/logout`, id);
+const logout = () => {
+    return user.post(`/logout`);
 };
 const avatar = (id) => {
     return user.get(`/${id}/avatar`);

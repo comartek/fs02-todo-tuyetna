@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import userToken from '../../service/userToken';
 
 
 const SignUp = (props) => {
@@ -18,19 +18,14 @@ const SignUp = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-
-    axios.post('https://api-nodejs-todolist.herokuapp.com/user/register', {
+    let data = {
       name: name,
       email: email,
       password: password,
       age: 20,
-      gentle: "man"
-    },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+    }
+
+    userToken.signup(data)
       .then(res => {
         navigate('/login', { replace: true })
         openNotificationWithIcon('success', "Sign up", "Create new user successfully")
